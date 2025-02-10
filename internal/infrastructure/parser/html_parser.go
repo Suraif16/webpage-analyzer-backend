@@ -13,24 +13,29 @@ func NewHTMLParser() *htmlParser {
     return &htmlParser{}
 }
 
+// GetHTMLVersion determines the HTML version by examining the DOCTYPE declaration.
+// Different HTML versions have distinct DOCTYPE formats:
+// - HTML5: <!DOCTYPE html>
+// - HTML 4.01: Contains "HTML 4.01" in the DOCTYPE
+// - XHTML: Contains "XHTML" in the DOCTYPE
 func (p *htmlParser) GetHTMLVersion(doc string) string {
-    docReader := strings.NewReader(doc)
-    docParsed, err := goquery.NewDocumentFromReader(docReader)
-    if err != nil {
-        return "Unknown"
+    // First check for HTML5's simple DOCTYPE
+    if strings.Contains(doc, "<!DOCTYPE html>") || 
+       strings.Contains(doc, "<!doctype html>") {
+        return "HTML5"
     }
-
-    // Check doctype node
-    doctype := docParsed.Find("DOCTYPE").Text()
+    
+    // Convert to lowercase for case-insensitive matching
+    docLower := strings.ToLower(doc)
+    
+    // Check for specific HTML versions in DOCTYPE declaration
     switch {
-    case strings.Contains(strings.ToLower(doctype), "html 5"):
-        return "HTML5"
-    case strings.Contains(doc, "<!DOCTYPE html>"):
-        return "HTML5"
-    case strings.Contains(strings.ToLower(doctype), "html 4.01"):
+    case strings.Contains(docLower, "html 4.01"):
         return "HTML 4.01"
-    case strings.Contains(strings.ToLower(doctype), "xhtml"):
+    case strings.Contains(docLower, "xhtml"):
         return "XHTML"
+    case strings.Contains(docLower, "html 5"):
+        return "HTML5"
     default:
         return "Unknown"
     }
