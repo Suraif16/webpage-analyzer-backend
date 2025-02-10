@@ -33,7 +33,6 @@ func TestAnalyzerHandler_Analyze(t *testing.T) {
     // Set Gin to test mode to avoid debug logging
     gin.SetMode(gin.TestMode)
 
-    // Define test cases using table-driven testing pattern
     tests := []struct {
         name           string
         requestBody    interface{}
