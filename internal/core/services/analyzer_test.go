@@ -9,7 +9,6 @@ import (
 	"github.com/suraif16/webpage-analyzer/internal/core/domain"
 )
 
-// MockHTTPClient implements the HTTPClient interface for testing
 type MockHTTPClient struct {
     mock.Mock
 }
@@ -24,7 +23,6 @@ func (m *MockHTTPClient) CheckLink(ctx context.Context, url string) bool {
     return args.Bool(0)
 }
 
-// MockHTMLParser implements the HTMLParser interface for testing
 type MockHTMLParser struct {
     mock.Mock
 }
@@ -54,7 +52,6 @@ func (m *MockHTMLParser) HasLoginForm(doc string) bool {
     return args.Bool(0)
 }
 
-// MockLogger implements the Logger interface for testing
 type MockLogger struct {
     mock.Mock
 }
@@ -68,7 +65,6 @@ func (m *MockLogger) Info(args ...interface{}) {
 }
 
 func TestAnalyzerService_Analyze(t *testing.T) {
-    // Define test cases
     tests := []struct {
         name          string
         url           string
@@ -146,24 +142,18 @@ func TestAnalyzerService_Analyze(t *testing.T) {
         },
     }
 
-    // Execute test cases
     for _, tt := range tests {
         t.Run(tt.name, func(t *testing.T) {
-            // Initialize mocks
             httpClient := new(MockHTTPClient)
             htmlParser := new(MockHTMLParser)
             logger := new(MockLogger)
 
-            // Setup mock expectations
             tt.setupMocks(httpClient, htmlParser, logger)
 
-            // Create service instance
             service := NewAnalyzerService(httpClient, htmlParser, logger)
 
-            // Execute the service method
             result, err := service.Analyze(context.Background(), tt.url)
 
-            // Assert expectations
             if tt.expectedError != nil {
                 assert.Error(t, err)
                 assert.Equal(t, tt.expectedError, err)
@@ -174,7 +164,6 @@ func TestAnalyzerService_Analyze(t *testing.T) {
                 assert.Equal(t, tt.expectedResult, result)
             }
 
-            // Verify all mock expectations were met
             httpClient.AssertExpectations(t)
             htmlParser.AssertExpectations(t)
             logger.AssertExpectations(t)

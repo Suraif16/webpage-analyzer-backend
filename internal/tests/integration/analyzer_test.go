@@ -14,7 +14,7 @@ import (
 	"github.com/suraif16/webpage-analyzer/internal/core/domain"
 	"github.com/suraif16/webpage-analyzer/internal/core/services"
 	"github.com/suraif16/webpage-analyzer/internal/handlers"
-	httpclient "github.com/suraif16/webpage-analyzer/internal/infrastructure/http/client" // Updated import alias
+	httpclient "github.com/suraif16/webpage-analyzer/internal/infrastructure/http/client"
 	"github.com/suraif16/webpage-analyzer/internal/infrastructure/parser"
 	"go.uber.org/zap"
 )
@@ -83,7 +83,6 @@ func TestIntegrationAnalyze(t *testing.T) {
 
     for _, tt := range tests {
         t.Run(tt.name, func(t *testing.T) {
-            // Prepare request
             body, err := json.Marshal(tt.requestBody)
             assert.NoError(t, err, "Failed to marshal request body")
 
@@ -95,7 +94,6 @@ func TestIntegrationAnalyze(t *testing.T) {
 
             assert.Equal(t, tt.expectedStatus, w.Code)
 
-            // Parse and verify response
             if tt.expectedError != nil {
                 var response domain.APIError
                 err := json.Unmarshal(w.Body.Bytes(), &response)
