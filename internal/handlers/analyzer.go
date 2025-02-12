@@ -7,6 +7,12 @@ import (
     "github.com/suraif16/webpage-analyzer/internal/core/ports"
 )
 
+// @title Web Page Analyzer API
+// @version 1.0
+// @description API for analyzing web pages
+
+// @host localhost:8080
+// @BasePath /
 type AnalyzerHandler struct {
     analyzer ports.PageAnalyzer
 }
@@ -17,6 +23,18 @@ func NewAnalyzerHandler(analyzer ports.PageAnalyzer) *AnalyzerHandler {
     }
 }
 
+// Analyze godoc
+// @Summary Analyze a webpage
+// @Description Analyzes a webpage for HTML version, headings, links, and login form
+// @Tags analyzer
+// @Accept json
+// @Produce json
+// @Param request body domain.AnalysisRequest true "URL to analyze"
+// @Success 200 {object} domain.PageAnalysis
+// @Failure 400 {object} domain.APIError
+// @Failure 404 {object} domain.APIError
+// @Failure 500 {object} domain.APIError
+// @Router /analyze [post]
 func (h *AnalyzerHandler) Analyze(c *gin.Context) {
     var req domain.AnalysisRequest
     if err := c.ShouldBindJSON(&req); err != nil {

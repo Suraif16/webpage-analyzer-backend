@@ -1,0 +1,93 @@
+definitions:
+  domain.APIError:
+    properties:
+      description:
+        type: string
+      message:
+        type: string
+      statusCode:
+        type: integer
+    type: object
+  domain.AnalysisRequest:
+    properties:
+      url:
+        type: string
+    required:
+    - url
+    type: object
+  domain.HeadingCount:
+    properties:
+      h1:
+        type: integer
+      h2:
+        type: integer
+      h3:
+        type: integer
+      h4:
+        type: integer
+      h5:
+        type: integer
+      h6:
+        type: integer
+    type: object
+  domain.LinkAnalysis:
+    properties:
+      external:
+        type: integer
+      inaccessible:
+        type: integer
+      internal:
+        type: integer
+    type: object
+  domain.PageAnalysis:
+    properties:
+      hasLoginForm:
+        type: boolean
+      headings:
+        $ref: '#/definitions/domain.HeadingCount'
+      htmlVersion:
+        type: string
+      links:
+        $ref: '#/definitions/domain.LinkAnalysis'
+      pageTitle:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /analyze:
+    post:
+      consumes:
+      - application/json
+      description: Analyzes a webpage for HTML version, headings, links, and login
+        form
+      parameters:
+      - description: URL to analyze
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.AnalysisRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.PageAnalysis'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/domain.APIError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/domain.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.APIError'
+      summary: Analyze a webpage
+      tags:
+      - analyzer
+swagger: "2.0"

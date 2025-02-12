@@ -16,6 +16,9 @@ import (
     httpClient "github.com/suraif16/webpage-analyzer/internal/infrastructure/http/client"
     "github.com/suraif16/webpage-analyzer/internal/infrastructure/parser"
     "github.com/suraif16/webpage-analyzer/internal/middleware"
+    swaggerFiles "github.com/swaggo/files"
+    ginSwagger "github.com/swaggo/gin-swagger"
+    _ "github.com/suraif16/webpage-analyzer/docs"
 )
 func main() {
     // Initialize logger
@@ -33,6 +36,9 @@ func main() {
     r.Use(gin.Recovery())
     r.Use(middleware.Logger(logger))
     r.Use(middleware.CORS())
+
+    // Swagger route
+    r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
     // Routes
     r.POST("/analyze", analyzerHandler.Analyze)
