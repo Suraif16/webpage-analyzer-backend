@@ -1,16 +1,19 @@
 package handlers
 
 import (
-    "bytes"
-    "encoding/json"
-    "net/http"
-    "net/http/httptest"
-    "testing"
-    "context"
-    "github.com/gin-gonic/gin"
-    "github.com/stretchr/testify/assert"
-    "github.com/stretchr/testify/mock"
-    "github.com/suraif16/webpage-analyzer/internal/core/domain"
+	"bytes"
+	"context"
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
+	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"github.com/suraif16/webpage-analyzer/internal/config"
+	"github.com/suraif16/webpage-analyzer/internal/core/domain"
+	"go.uber.org/zap"
 )
 
 type MockAnalyzer struct {
@@ -26,8 +29,15 @@ func (m *MockAnalyzer) Analyze(ctx context.Context, url string) (*domain.PageAna
 }
 
 func TestAnalyzerHandler_Analyze(t *testing.T) {
-    // Set Gin to test mode to avoid debug logging
-    gin.SetMode(gin.TestMode)
+    // Initialize logger
+    logger, _ := zap.NewProduction()
+    defer logger.Sync()
+
+    config, err := config.LoadConfig()
+    if err != nil {
+        t.Fatal("Cannot load config:", err)
+    }
+    gin.SetMode(config.GinMode)
 
     tests := []struct {
         name           string
@@ -113,7 +123,7 @@ func TestAnalyzerHandler_Analyze(t *testing.T) {
             // Setup test environment
             mockAnalyzer := new(MockAnalyzer)
             tt.setupMock(mockAnalyzer)
-            handler := NewAnalyzerHandler(mockAnalyzer)
+            handler := NewAnalyzerHandler(mockAnalyzer, logger)
 
             w := httptest.NewRecorder()
             c, _ := gin.CreateTestContext(w)

@@ -45,8 +45,8 @@ func (s *analyzerService) Analyze(ctx context.Context, urlStr string) (*domain.P
         }
     }
 
-
     // Analyze page
+    s.logger.Info("parsing webpage content")
     analysis := &domain.PageAnalysis{
         HTMLVersion:  s.htmlParser.GetHTMLVersion(content),
         PageTitle:    s.htmlParser.GetTitle(content),
@@ -56,5 +56,7 @@ func (s *analyzerService) Analyze(ctx context.Context, urlStr string) (*domain.P
     }
 
     s.logger.Info("page analysis completed", "url", urlStr)
+
+    
     return analysis, nil
 }

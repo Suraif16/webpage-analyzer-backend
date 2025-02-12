@@ -11,6 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
+	"github.com/suraif16/webpage-analyzer/internal/config"
 	"github.com/suraif16/webpage-analyzer/internal/core/domain"
 	"github.com/suraif16/webpage-analyzer/internal/core/services"
 	"github.com/suraif16/webpage-analyzer/internal/handlers"
@@ -21,18 +22,24 @@ import (
 
 // setupRouter creates a test router with all necessary dependencies
 func setupRouter() *gin.Engine {
-    gin.SetMode(gin.TestMode)
-    r := gin.New()
-
     // Initialize logger
     logger, _ := zap.NewProduction()
     defer logger.Sync()
 
+    config, err := config.LoadConfig()
+    if err != nil {
+        logger.Fatal("Cannot load config", zap.Error(err))
+    }
+
+    gin.SetMode(config.GinMode) 
+    
+    r := gin.New()
+
     // Initialize dependencies with proper error handling
     httpClient := httpclient.NewHTTPClient(10 * time.Second)
-    htmlParser := parser.NewHTMLParser()
+    htmlParser := parser.NewHTMLParser(logger)
     analyzerService := services.NewAnalyzerService(httpClient, htmlParser, logger.Sugar())
-    handler := handlers.NewAnalyzerHandler(analyzerService)
+    handler := handlers.NewAnalyzerHandler(analyzerService, logger)
 
     r.POST("/analyze", handler.Analyze)
     return r

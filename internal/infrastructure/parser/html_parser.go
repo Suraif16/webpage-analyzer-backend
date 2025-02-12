@@ -5,12 +5,17 @@ import (
     "net/url"
     "github.com/PuerkitoBio/goquery"
     "github.com/suraif16/webpage-analyzer/internal/core/domain"
+    "go.uber.org/zap"
 )
 
-type htmlParser struct{}
+type htmlParser struct {
+    logger *zap.Logger
+}
 
-func NewHTMLParser() *htmlParser {
-    return &htmlParser{}
+func NewHTMLParser(logger *zap.Logger) *htmlParser {
+    return &htmlParser{
+        logger: logger,
+    }
 }
 
 // GetHTMLVersion determines the HTML version by examining the DOCTYPE declaration.
@@ -19,6 +24,7 @@ func NewHTMLParser() *htmlParser {
 // - HTML 4.01: Contains "HTML 4.01" in the DOCTYPE
 // - XHTML: Contains "XHTML" in the DOCTYPE
 func (p *htmlParser) GetHTMLVersion(doc string) string {
+    p.logger.Info("func: GetHTMLVersion started")
     // First check for HTML5's simple DOCTYPE
     if strings.Contains(doc, "<!DOCTYPE html>") || 
        strings.Contains(doc, "<!doctype html>") {
@@ -42,6 +48,7 @@ func (p *htmlParser) GetHTMLVersion(doc string) string {
 }
 
 func (p *htmlParser) GetTitle(doc string) string {
+    p.logger.Info("func: GetTitle started")
     docReader := strings.NewReader(doc)
     docParsed, err := goquery.NewDocumentFromReader(docReader)
     if err != nil {
@@ -51,6 +58,7 @@ func (p *htmlParser) GetTitle(doc string) string {
 }
 
 func (p *htmlParser) CountHeadings(doc string) domain.HeadingCount {
+    p.logger.Info("func: CountHeadings started")
     docReader := strings.NewReader(doc)
     docParsed, err := goquery.NewDocumentFromReader(docReader)
     if err != nil {
@@ -82,6 +90,7 @@ func (p *htmlParser) CountHeadings(doc string) domain.HeadingCount {
 }
 
 func (p *htmlParser) AnalyzeLinks(doc string, baseURL string) domain.LinkAnalysis {
+    p.logger.Info("func: AnalyzeLinks started")
     docReader := strings.NewReader(doc)
     docParsed, err := goquery.NewDocumentFromReader(docReader)
     if err != nil {
@@ -121,6 +130,7 @@ func (p *htmlParser) AnalyzeLinks(doc string, baseURL string) domain.LinkAnalysi
 }
 
 func (p *htmlParser) HasLoginForm(doc string) bool {
+    p.logger.Info("func: HasLoginForm started")
     docReader := strings.NewReader(doc)
     docParsed, err := goquery.NewDocumentFromReader(docReader)
     if err != nil {

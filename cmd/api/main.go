@@ -1,35 +1,41 @@
 package main
 
 import (
-    "context"
-    "net/http"
-    "os"
-    "os/signal"
-    "syscall"
-    "time"
+	"context"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
-    "github.com/gin-gonic/gin"
-    "go.uber.org/zap"
-    
-    "github.com/suraif16/webpage-analyzer/internal/core/services"
-    "github.com/suraif16/webpage-analyzer/internal/handlers"
-    httpClient "github.com/suraif16/webpage-analyzer/internal/infrastructure/http/client"
-    "github.com/suraif16/webpage-analyzer/internal/infrastructure/parser"
-    "github.com/suraif16/webpage-analyzer/internal/middleware"
-    swaggerFiles "github.com/swaggo/files"
-    ginSwagger "github.com/swaggo/gin-swagger"
-    _ "github.com/suraif16/webpage-analyzer/docs"
+	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
+
+	_ "github.com/suraif16/webpage-analyzer/docs"
+	"github.com/suraif16/webpage-analyzer/internal/config"
+	"github.com/suraif16/webpage-analyzer/internal/core/services"
+	"github.com/suraif16/webpage-analyzer/internal/handlers"
+	httpClient "github.com/suraif16/webpage-analyzer/internal/infrastructure/http/client"
+	"github.com/suraif16/webpage-analyzer/internal/infrastructure/parser"
+	"github.com/suraif16/webpage-analyzer/internal/middleware"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 func main() {
     // Initialize logger
     logger, _ := zap.NewProduction()
     defer logger.Sync()
 
+    config, err := config.LoadConfig()
+    if err != nil {
+        logger.Fatal("Cannot load config:", zap.Error(err))
+    }
+
     // Initialize dependencies
-    httpClient := httpClient.NewHTTPClient(10 * time.Second)
-    htmlParser := parser.NewHTMLParser()
+    httpClient := httpClient.NewHTTPClient(config.RequestTimeout)
+    htmlParser := parser.NewHTMLParser(logger)
     analyzerService := services.NewAnalyzerService(httpClient, htmlParser, logger.Sugar())
-    analyzerHandler := handlers.NewAnalyzerHandler(analyzerService)
+    analyzerHandler := handlers.NewAnalyzerHandler(analyzerService, logger)
 
     // Setup Gin
     r := gin.New()
@@ -48,9 +54,10 @@ func main() {
 
     // Server configuration
     srv := &http.Server{
-        Addr:    ":8080",
+        Addr:    ":" + config.Port,
         Handler: r,
     }
+    logger.Info("Starting server on port " + config.Port)
 
     // Graceful shutdown
     go func() {

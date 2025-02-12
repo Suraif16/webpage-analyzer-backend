@@ -22,7 +22,7 @@ WORKDIR /app
 # Copy binary from builder
 COPY --from=0 /web-analyzer .
 
-EXPOSE 8080
+EXPOSE ${PORT:-8080}
 
 # Run the application
 CMD ["./web-analyzer"]

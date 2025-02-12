@@ -5,9 +5,14 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/suraif16/webpage-analyzer/internal/core/domain"
+	"go.uber.org/zap"
 )
 
 func TestHTMLParser_GetHTMLVersion(t *testing.T) {
+    // Initialize logger
+    logger, _ := zap.NewProduction()
+    defer logger.Sync()
+
     tests := []struct {
         name     string
         html     string
@@ -53,7 +58,7 @@ func TestHTMLParser_GetHTMLVersion(t *testing.T) {
         },
     }
 
-    parser := NewHTMLParser()
+    parser := NewHTMLParser(logger)
 
     for _, tt := range tests {
         t.Run(tt.name, func(t *testing.T) {
@@ -66,6 +71,10 @@ func TestHTMLParser_GetHTMLVersion(t *testing.T) {
 }
 
 func TestHTMLParser_CountHeadings(t *testing.T) {
+    // Initialize logger
+    logger, _ := zap.NewProduction()
+    defer logger.Sync()
+
     html := `
         <html>
             <body>
@@ -87,12 +96,16 @@ func TestHTMLParser_CountHeadings(t *testing.T) {
         H6: 1,
     }
 
-    parser := NewHTMLParser()
+    parser := NewHTMLParser(logger)
     result := parser.CountHeadings(html)
     assert.Equal(t, expected, result)
 }
 
 func TestHTMLParser_HasLoginForm(t *testing.T) {
+    // Initialize logger
+    logger, _ := zap.NewProduction()
+    defer logger.Sync()
+
     tests := []struct {
         name     string
         html     string
@@ -119,7 +132,7 @@ func TestHTMLParser_HasLoginForm(t *testing.T) {
         },
     }
 
-    parser := NewHTMLParser()
+    parser := NewHTMLParser(logger)
 
     for _, tt := range tests {
         t.Run(tt.name, func(t *testing.T) {

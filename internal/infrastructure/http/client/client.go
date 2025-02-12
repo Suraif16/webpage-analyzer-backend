@@ -1,15 +1,18 @@
 package http
 
 import (
-    "context"
-    "io"
-    "net/http"
-    "time"
-    "github.com/suraif16/webpage-analyzer/internal/core/domain"
+	"context"
+	"io"
+	"net/http"
+	"time"
+
+	"github.com/suraif16/webpage-analyzer/internal/core/domain"
+	"go.uber.org/zap"
 )
 
 type client struct {
     httpClient *http.Client
+    logger     *zap.Logger
 }
 
 func NewHTTPClient(timeout time.Duration) *client {
@@ -27,14 +30,18 @@ func NewHTTPClient(timeout time.Duration) *client {
 }
 
 func (c *client) FetchPage(ctx context.Context, url string) (string, error) {
+    c.logger.Info("creating HTTP request", zap.String("url", url))
+
     req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
     if err != nil {
+        c.logger.Error("failed to create request", zap.Error(err))
         return "", domain.ErrInvalidURL
     }
 
     // Set user agent to avoid being blocked
     req.Header.Set("User-Agent", "Mozilla/5.0 (compatible; WebAnalyzer/1.0)")
 
+    c.logger.Info("sending HTTP request")
     resp, err := c.httpClient.Do(req)
     if err != nil {
         return "", domain.ErrPageNotAccessible
