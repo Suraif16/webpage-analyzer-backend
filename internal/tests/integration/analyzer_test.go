@@ -22,99 +22,99 @@ import (
 
 // setupRouter creates a test router with all necessary dependencies
 func setupRouter() *gin.Engine {
-    // Initialize logger
-    logger, _ := zap.NewProduction()
-    defer logger.Sync()
+	// Initialize logger
+	logger, _ := zap.NewProduction()
+	defer logger.Sync()
 
-    config, err := config.LoadConfig()
-    if err != nil {
-        logger.Fatal("Cannot load config", zap.Error(err))
-    }
+	config, err := config.LoadConfig()
+	if err != nil {
+		logger.Fatal("Cannot load config", zap.Error(err))
+	}
 
-    gin.SetMode(config.GinMode) 
-    
-    r := gin.New()
+	gin.SetMode(config.GinMode)
 
-    // Initialize dependencies with proper error handling
-    httpClient := httpclient.NewHTTPClient(10 * time.Second)
-    htmlParser := parser.NewHTMLParser(logger)
-    analyzerService := services.NewAnalyzerService(httpClient, htmlParser, logger.Sugar())
-    handler := handlers.NewAnalyzerHandler(analyzerService, logger)
+	r := gin.New()
 
-    r.POST("/analyze", handler.Analyze)
-    return r
+	// Initialize dependencies with proper error handling
+	httpClient := httpclient.NewHTTPClient(10 * time.Second, logger)
+	htmlParser := parser.NewHTMLParser(logger)
+	analyzerService := services.NewAnalyzerService(httpClient, htmlParser, logger)
+	handler := handlers.NewAnalyzerHandler(analyzerService, logger)
+
+	r.POST("/analyze", handler.Analyze)
+	return r
 }
 
 func TestIntegrationAnalyze(t *testing.T) {
-    router := setupRouter()
+	router := setupRouter()
 
-    tests := []struct {
-        name           string
-        requestBody    interface{}
-        expectedStatus int
-        expectedError  *domain.APIError
-    }{
-        {
-            name: "Valid URL",
-            requestBody: domain.AnalysisRequest{
-                URL: "https://www.example.com",
-            },
-            expectedStatus: nethttp.StatusOK,
-            expectedError:  nil,
-        },
-        {
-            name: "Invalid URL Format",
-            requestBody: domain.AnalysisRequest{
-                URL: "not-a-url",
-            },
-            expectedStatus: nethttp.StatusBadRequest,
-            expectedError:  domain.ErrInvalidURL,
-        },
-        {
-            name: "Malformed Request",
-            requestBody: map[string]interface{}{
-                "invalid_field": "value",
-            },
-            expectedStatus: http.StatusBadRequest,
-            expectedError:  domain.ErrInvalidURL,
-        },
-        {
-            name: "Empty URL",
-            requestBody: domain.AnalysisRequest{
-                URL: "",
-            },
-            expectedStatus: http.StatusBadRequest,
-            expectedError:  domain.ErrInvalidURL,
-        },
-    }
+	tests := []struct {
+		name           string
+		requestBody    interface{}
+		expectedStatus int
+		expectedError  *domain.APIError
+	}{
+		{
+			name: "Valid URL",
+			requestBody: domain.AnalysisRequest{
+				URL: "https://www.example.com",
+			},
+			expectedStatus: nethttp.StatusOK,
+			expectedError:  nil,
+		},
+		{
+			name: "Invalid URL Format",
+			requestBody: domain.AnalysisRequest{
+				URL: "not-a-url",
+			},
+			expectedStatus: nethttp.StatusBadRequest,
+			expectedError:  domain.ErrInvalidURL,
+		},
+		{
+			name: "Malformed Request",
+			requestBody: map[string]interface{}{
+				"invalid_field": "value",
+			},
+			expectedStatus: http.StatusBadRequest,
+			expectedError:  domain.ErrInvalidURL,
+		},
+		{
+			name: "Empty URL",
+			requestBody: domain.AnalysisRequest{
+				URL: "",
+			},
+			expectedStatus: http.StatusBadRequest,
+			expectedError:  domain.ErrInvalidURL,
+		},
+	}
 
-    for _, tt := range tests {
-        t.Run(tt.name, func(t *testing.T) {
-            body, err := json.Marshal(tt.requestBody)
-            assert.NoError(t, err, "Failed to marshal request body")
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			body, err := json.Marshal(tt.requestBody)
+			assert.NoError(t, err, "Failed to marshal request body")
 
-            req := httptest.NewRequest(http.MethodPost, "/analyze", bytes.NewBuffer(body))
-            req.Header.Set("Content-Type", "application/json")
-            
-            w := httptest.NewRecorder()
-            router.ServeHTTP(w, req)
+			req := httptest.NewRequest(http.MethodPost, "/analyze", bytes.NewBuffer(body))
+			req.Header.Set("Content-Type", "application/json")
 
-            assert.Equal(t, tt.expectedStatus, w.Code)
+			w := httptest.NewRecorder()
+			router.ServeHTTP(w, req)
 
-            if tt.expectedError != nil {
-                var response domain.APIError
-                err := json.Unmarshal(w.Body.Bytes(), &response)
-                assert.NoError(t, err, "Failed to unmarshal error response")
-                assert.Equal(t, tt.expectedError.StatusCode, response.StatusCode)
-                assert.Equal(t, tt.expectedError.Message, response.Message)
-            } else if w.Code == nethttp.StatusOK {
-                var response domain.PageAnalysis
-                err := json.Unmarshal(w.Body.Bytes(), &response)
-                assert.NoError(t, err, "Failed to unmarshal success response")
-                // Verify basic structure of response
-                assert.NotEmpty(t, response.HTMLVersion)
-                assert.NotEmpty(t, response.PageTitle)
-            }
-        })
-    }
+			assert.Equal(t, tt.expectedStatus, w.Code)
+
+			if tt.expectedError != nil {
+				var response domain.APIError
+				err := json.Unmarshal(w.Body.Bytes(), &response)
+				assert.NoError(t, err, "Failed to unmarshal error response")
+				assert.Equal(t, tt.expectedError.StatusCode, response.StatusCode)
+				assert.Equal(t, tt.expectedError.Message, response.Message)
+			} else if w.Code == nethttp.StatusOK {
+				var response domain.PageAnalysis
+				err := json.Unmarshal(w.Body.Bytes(), &response)
+				assert.NoError(t, err, "Failed to unmarshal success response")
+				// Verify basic structure of response
+				assert.NotEmpty(t, response.HTMLVersion)
+				assert.NotEmpty(t, response.PageTitle)
+			}
+		})
+	}
 }

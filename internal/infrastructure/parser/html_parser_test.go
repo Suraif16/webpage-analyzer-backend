@@ -9,73 +9,73 @@ import (
 )
 
 func TestHTMLParser_GetHTMLVersion(t *testing.T) {
-    // Initialize logger
-    logger, _ := zap.NewProduction()
-    defer logger.Sync()
+	// Initialize logger
+	logger, _ := zap.NewProduction()
+	defer logger.Sync()
 
-    tests := []struct {
-        name     string
-        html     string
-        expected string
-    }{
-        {
-            name: "HTML5 simple DOCTYPE",
-            html: "<!DOCTYPE html><html><head></head><body></body></html>",
-            expected: "HTML5",
-        },
-        {
-            name: "HTML5 lowercase DOCTYPE",
-            html: "<!doctype html><html></html>",
-            expected: "HTML5",
-        },
-        {
-            name: "HTML 4.01 Strict",
-            html: `<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+	tests := []struct {
+		name     string
+		html     string
+		expected string
+	}{
+		{
+			name:     "HTML5 simple DOCTYPE",
+			html:     "<!DOCTYPE html><html><head></head><body></body></html>",
+			expected: "HTML5",
+		},
+		{
+			name:     "HTML5 lowercase DOCTYPE",
+			html:     "<!doctype html><html></html>",
+			expected: "HTML5",
+		},
+		{
+			name: "HTML 4.01 Strict",
+			html: `<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
                   <html></html>`,
-            expected: "HTML 4.01",
-        },
-        {
-            name: "HTML 4.01 Transitional",
-            html: `<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+			expected: "HTML 4.01",
+		},
+		{
+			name: "HTML 4.01 Transitional",
+			html: `<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
                   <html></html>`,
-            expected: "HTML 4.01",
-        },
-        {
-            name: "XHTML 1.0",
-            html: `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN">
+			expected: "HTML 4.01",
+		},
+		{
+			name: "XHTML 1.0",
+			html: `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN">
                   <html></html>`,
-            expected: "XHTML",
-        },
-        {
-            name: "No DOCTYPE",
-            html: "<html><head></head><body></body></html>",
-            expected: "Unknown",
-        },
-        {
-            name: "Malformed DOCTYPE",
-            html: "<!DOCTYPE something><html></html>",
-            expected: "Unknown",
-        },
-    }
+			expected: "XHTML",
+		},
+		{
+			name:     "No DOCTYPE",
+			html:     "<html><head></head><body></body></html>",
+			expected: "Unknown",
+		},
+		{
+			name:     "Malformed DOCTYPE",
+			html:     "<!DOCTYPE something><html></html>",
+			expected: "Unknown",
+		},
+	}
 
-    parser := NewHTMLParser(logger)
+	parser := NewHTMLParser(logger)
 
-    for _, tt := range tests {
-        t.Run(tt.name, func(t *testing.T) {
-            result := parser.GetHTMLVersion(tt.html)
-            assert.Equal(t, tt.expected, result, 
-                "For HTML: %s\nExpected: %s\nGot: %s", 
-                tt.html, tt.expected, result)
-        })
-    }
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := parser.GetHTMLVersion(tt.html)
+			assert.Equal(t, tt.expected, result,
+				"For HTML: %s\nExpected: %s\nGot: %s",
+				tt.html, tt.expected, result)
+		})
+	}
 }
 
 func TestHTMLParser_CountHeadings(t *testing.T) {
-    // Initialize logger
-    logger, _ := zap.NewProduction()
-    defer logger.Sync()
+	// Initialize logger
+	logger, _ := zap.NewProduction()
+	defer logger.Sync()
 
-    html := `
+	html := `
         <html>
             <body>
                 <h1>Title</h1>
@@ -87,57 +87,57 @@ func TestHTMLParser_CountHeadings(t *testing.T) {
         </html>
     `
 
-    expected := domain.HeadingCount{
-        H1: 1,
-        H2: 2,
-        H3: 1,
-        H4: 0,
-        H5: 0,
-        H6: 1,
-    }
+	expected := domain.HeadingCount{
+		H1: 1,
+		H2: 2,
+		H3: 1,
+		H4: 0,
+		H5: 0,
+		H6: 1,
+	}
 
-    parser := NewHTMLParser(logger)
-    result := parser.CountHeadings(html)
-    assert.Equal(t, expected, result)
+	parser := NewHTMLParser(logger)
+	result := parser.CountHeadings(html)
+	assert.Equal(t, expected, result)
 }
 
 func TestHTMLParser_HasLoginForm(t *testing.T) {
-    // Initialize logger
-    logger, _ := zap.NewProduction()
-    defer logger.Sync()
+	// Initialize logger
+	logger, _ := zap.NewProduction()
+	defer logger.Sync()
 
-    tests := []struct {
-        name     string
-        html     string
-        expected bool
-    }{
-        {
-            name: "Has login form",
-            html: `
+	tests := []struct {
+		name     string
+		html     string
+		expected bool
+	}{
+		{
+			name: "Has login form",
+			html: `
                 <form>
                     <input type="text" name="username">
                     <input type="password" name="password">
                 </form>
             `,
-            expected: true,
-        },
-        {
-            name: "No login form",
-            html: `
+			expected: true,
+		},
+		{
+			name: "No login form",
+			html: `
                 <form>
                     <input type="text" name="search">
                 </form>
             `,
-            expected: false,
-        },
-    }
+			expected: false,
+		},
+	}
 
-    parser := NewHTMLParser(logger)
+	parser := NewHTMLParser(logger)
 
-    for _, tt := range tests {
-        t.Run(tt.name, func(t *testing.T) {
-            result := parser.HasLoginForm(tt.html)
-            assert.Equal(t, tt.expected, result)
-        })
-    }
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := parser.HasLoginForm(tt.html)
+			assert.Equal(t, tt.expected, result)
+		})
+	}
 }
