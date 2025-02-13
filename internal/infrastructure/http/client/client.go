@@ -21,7 +21,7 @@ func NewHTTPClient(timeout time.Duration, logger *zap.Logger) *client {
 			Timeout: timeout,
 			CheckRedirect: func(req *http.Request, via []*http.Request) error {
 				if len(via) >= 10 {
-					return domain.ErrPageNotAccessible
+					return domain.ErrTimeout
 				}
 				return nil
 			},
