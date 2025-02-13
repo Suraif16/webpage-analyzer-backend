@@ -2,8 +2,8 @@
 
 A Go service that analyzes web pages for HTML version, title, headings with different levels, internal & external links, inaccessible links and whether it contains a login form or not.
 
-Check out the live demo here:  
-[Demo URL]([https://your-demo-url.com](https://drive.google.com/file/d/1yrAjqgbYQOJGVGoXGaxWfuBWoEIzkbwI/view?usp=sharing))
+Check out demo video of application:  
+[Demo URL]([https://your-demo-url.com](https://drive.google.com/file/d/1yrAjqgbYQOJGVGoXGaxWfuBWoEIzkbwI/view?usp=sharing)
 
 ## Prerequisites
 
