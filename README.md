@@ -1,6 +1,9 @@
 # Web Page Analyzer Backend
 
-A Go service that analyzes web pages for HTML version, headings, links, and more.
+A Go service that analyzes web pages for HTML version, title, headings with different levels, internal & external links, inaccessible links and whether it contains a login form or not.
+
+Check out demo video of application:  
+[Demo URL](https://drive.google.com/file/d/1yrAjqgbYQOJGVGoXGaxWfuBWoEIzkbwI/view?usp=sharing)
 
 ## Prerequisites
 
@@ -11,31 +14,16 @@ Ensure you have the following installed:
 
 ## Setup
 
-1. Clone the repository:
-   ```sh
-   git clone <repository-url>
-   cd webpage-analyzer-backend
-   ```
-
-2. Install dependencies:
+1. Install dependencies:
    ```sh
    go mod download
    ```
 
-3. Create a `.env` file in the root directory:
-   ```env
-   PORT=8080
-   GIN_MODE=release
-   ALLOWED_ORIGINS=http://localhost:3000
+2. Running the Server
+   ```sh
+   go run cmd/api/main.go
    ```
-
-## Running the Application
-
-Start the server:
-```sh
-go run cmd/api/main.go
-```
-Access the application at: [http://localhost:8080](http://localhost:8080)
+Access the server at: [http://localhost:8080](http://localhost:8080)
 
 ## API Documentation
 
@@ -54,14 +42,46 @@ go test ./... -v
 ```
 webpage-analyzer-backend/
 ├── cmd/
-│   └── api/          # Application entry point
+│   └── api/                    # Application entry point
+│       └── main.go
 ├── internal/
 │   ├── core/         # Business logic
+│   │   ├── domain/            # Business entities and errors
+│   │   │   ├── types.go       # Data structures
+│   │   │   └── errors.go      # Custom error definitions
+│   │   ├── ports/             # Interfaces
+│   │   │   └── analyzer.go    # Core interfaces
+│   │   └── services/          # Business logic implementation
+│   │       └── analyzer.go    # Main analysis service
 │   ├── handlers/     # HTTP handlers
 │   ├── middleware/   # HTTP middleware
 │   └── infrastructure/  # External implementations
+│       ├── http/             # HTTP client
+│       │   └── client/
+│       │       └── client.go
+│       └── parser/           # HTML parsing
+│           └── html_parser.go
+├── tests/                     # Integration tests
+├── docs/                      # Generated Swagger docs
 └── .env              # Environment variables
 ```
+
+## Libraries used & their purpose
+- gin-gonic/gin - Web framework with high performance, middleware support
+- uber-go/zap - Structured Logging
+- stretchr/testify - Testing (with support for assertions, mocking)
+- swaggo/swag - API documentation
+- PuerkitoBio/goquery - HTML parsing
+
+## Challenges faced and how I overcome them
+- Mocking External Services for testing- Used mocks
+- Writing repetitive test cases for different URL scenarios - Implemented table-driven tests
+- Deploying to Microsoft Azure using docker.compose file - (Work in Progress)
+
+## Additional Information
+
+For more details, visit the documentation:  
+[Documentation URL](https://docs.google.com/document/d/18IrcFGb_ur-Axp3A0NRtFfond7CdH8vCVmjz4spNSyg/edit?tab=t.0#heading=h.vwi3xxoqbucr)
 
 ## License
 
